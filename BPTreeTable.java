@@ -1,6 +1,6 @@
 
 /****************************************************************************************
- * @file  Table.java
+ * @file  BPTreeTable.java
  *
  * @author   John Miller
  */
@@ -20,7 +20,7 @@ import static java.lang.System.out;
  * select, union, minus join.  The insert data manipulation operator is also provided.
  * Missing are update and delete data manipulation operators.
  */
-public class Table
+public class BPTreeTable
        implements Serializable
 {
     /** Relative path for storage directory
@@ -35,7 +35,7 @@ public class Table
      */
     private static int count = 0;
 
-    /** Table name.
+    /** BPTreeTable name.
      */
     private final String name;
 
@@ -52,7 +52,7 @@ public class Table
 
     /** Collection of tuples (data storage).
      */
-    private final List <Comparable []> tuples;
+    protected final List <Comparable []> tuples;
 
     /** Primary key. 
      */
@@ -74,7 +74,7 @@ public class Table
      * @param _domain     the string containing attribute domains (data types)
      * @param _key        the primary key
      */  
-    public Table (String _name, String [] _attribute, Class [] _domain, String [] _key)
+    public BPTreeTable (String _name, String [] _attribute, Class [] _domain, String [] _key)
     {
         name      = _name;
         attribute = _attribute;
@@ -93,7 +93,7 @@ public class Table
      * @param _key        the primary key
      * @param _tuple      the list of tuples containing the data
      */  
-    public Table (String _name, String [] _attribute, Class [] _domain, String [] _key,
+    public BPTreeTable (String _name, String [] _attribute, Class [] _domain, String [] _key,
                   List <Comparable []> _tuples)
     {
         name      = _name;
@@ -101,7 +101,7 @@ public class Table
         domain    = _domain;
         key       = _key;
         tuples    = _tuples;
-        index     = new BpTreeMap<>(KeyType.class, Comparable[].class);;       // also try BPTreeMap, LinHashMap or ExtHashMap
+        index     = new BpTreeMap<>(KeyType.class, Comparable[].class);       // also try BPTreeMap, LinHashMap or ExtHashMap
     } // constructor
 
     /************************************************************************************
@@ -111,11 +111,10 @@ public class Table
      * @param attributes  the string containing attributes names
      * @param domains     the string containing attribute domains (data types)
      */
-    public Table (String name, String attributes, String domains, String _key)
+    public BPTreeTable (String name, String attributes, String domains, String _key)
     {
         this (name, attributes.split (" "), findClass (domains.split (" ")), _key.split(" "));
 
-        out.println ("DDL> create table " + name + " (" + attributes + ")");
     } // constructor
 
     //----------------------------------------------------------------------------------
@@ -131,9 +130,9 @@ public class Table
      * @param attributes  the attributes to project onto
      * @return  a table of projected tuples
      */
-    public Table project (String attributes)
+    public BPTreeTable project (String attributes)
     {
-    	out.println ("RA> " + name + ".project (" + attributes + ")");
+    	//out.println ("RA> " + name + ".project (" + attributes + ")");
         String [] attrs     = attributes.split (" ");
         Class []  colDomain = extractDom (match (attrs), domain);
         String [] newKey    = (Arrays.asList (attrs).containsAll (Arrays.asList (key))) ? key : attrs;
@@ -144,7 +143,7 @@ public class Table
 		
         		}
 
-        return new Table (name + count++, attrs, colDomain, newKey, rows);
+        return new BPTreeTable (name + count++, attrs, colDomain, newKey, rows);
     } // project
 
     /************************************************************************************
@@ -155,13 +154,13 @@ public class Table
      * @param predicate  the check condition for tuples
      * @return  a table with tuples satisfying the predicate
      */
-    public Table select (Predicate <Comparable []> predicate)
+    public BPTreeTable select (Predicate <Comparable []> predicate)
     {
-        out.println ("RA> " + name + ".select (" + predicate + ")");
+        //out.println ("RA> " + name + ".select (" + predicate + ")");
 
         List <Comparable []> rows = new ArrayList<Comparable []>();
         
-        //Table check = new Table("check", attribute, domain, key, rows);
+        //BPTreeTable check = new BPTreeTable("check", attribute, domain, key, rows);
         for (Comparable [] tup : this.tuples) 
     	{
         	if(predicate.test(tup))
@@ -170,7 +169,7 @@ public class Table
     		}
         } 
 
-        return new Table (name + count++, attribute, domain, key, rows);
+        return new BPTreeTable (name + count++, attribute, domain, key, rows);
     } // select
 
     /************************************************************************************
@@ -180,15 +179,16 @@ public class Table
      * @param keyVal  the given key value
      * @return  a table with the tuple satisfying the key predicate
      */
-    public Table select (KeyType keyVal)
+    public BPTreeTable select (KeyType keyVal)
     {
-        out.println ("RA> " + name + ".select (" + keyVal + ")");
+        //out.println ("RA> " + name + ".select (" + keyVal + ")");
 
         List <Comparable []> rows = new ArrayList<Comparable []>();
+        
 			
         rows.add(index.get(keyVal));
 
-        return new Table (name + count++, attribute, domain, key, rows);
+        return new BPTreeTable (name + count++, attribute, domain, key, rows);
     } // select
 
     /************************************************************************************
@@ -200,9 +200,9 @@ public class Table
      * @param table2  the rhs table in the union operation
      * @return  a table representing the union
      */
-    public Table union (Table table2)
+    public BPTreeTable union (BPTreeTable table2)
     {
-        out.println ("RA> " + name + ".union (" + table2.name + ")");
+        //out.println ("RA> " + name + ".union (" + table2.name + ")");
         if (! compatible (table2)) return null;
 
         List <Comparable []> rows = new ArrayList<Comparable []>();
@@ -219,7 +219,7 @@ public class Table
         
         //check.print();
 
-        return new Table (name + count++, attribute, domain, key, rows);
+        return new BPTreeTable (name + count++, attribute, domain, key, rows);
     } // union
 
     /************************************************************************************
@@ -231,10 +231,10 @@ public class Table
      * @param table2  The rhs table in the minus operation
      * @return  a table representing the difference
      */
-    public Table minus (Table table2)
+    public BPTreeTable minus (BPTreeTable table2)
     {
     	int count = 0;
-        out.println ("RA> " + name + ".minus (" + table2.name + ")");
+        //out.println ("RA> " + name + ".minus (" + table2.name + ")");
        if (! compatible (table2)) return null;
         boolean minus = false;
         //List <Comparable []> rows = null;
@@ -252,9 +252,10 @@ public class Table
         	}//for mapIndex
         	
 
-        return new Table (name + count++, attribute, domain, key, rows);
+        return new BPTreeTable (name + count++, attribute, domain, key, rows);
     } // minus
-
+    
+    
     /************************************************************************************
      * Join this table and table2 by performing an equijoin.  Tuples from both tables
      * are compared requiring attributes1 to equal attributes2.  Disambiguate attribute
@@ -268,7 +269,7 @@ public class Table
      * @param table2      the rhs table in the join operation
      * @return  a table with tuples satisfying the equality predicate
      */
-    public Table join(String attribute1, String attribute2, Table table2) {
+    public BPTreeTable nestedLoopJoin(String attribute1, String attribute2, BPTreeTable table2) {
     	out.println ("RA> " + name + ".join (" + attribute1 + ", " + attribute2 + ", "
 				+ table2.name + ")");
 
@@ -335,15 +336,43 @@ public class Table
 				
 			}
 		}
-		
-		
-			
-		
-		
 
-		return new Table (name + count++, ArrayUtil.concat (attribute, table2.attribute),
+		return new BPTreeTable (name + count++, ArrayUtil.concat (attribute, table2.attribute),
 				ArrayUtil.concat (domain, table2.domain), key, rows);
-	} // join
+	} //nestedLoopJoin
+
+    /************************************************************************************
+     * Join this table and table2 by performing an equijoin.  Tuples from both tables
+     * are compared requiring attributes1 to equal attributes2.  Disambiguate attribute
+     * names by append "2" to the end of any duplicate attribute name.
+     * Indexed Join
+     *
+     * @param attribute1  the attributes of this table to be compared (Foreign Key)
+     * @param attribute2  the attributes of table2 to be compared (Primary Key)
+     * @param table2      the rhs table in the join operation
+     * @return  a table with tuples satisfying the equality predicate
+     */
+    public BPTreeTable indexedJoin(String attribute1, String attribute2, BPTreeTable table2) 
+    {
+    	String[] t_attrs = attribute1.split(" ");
+		String[] u_attrs = attribute2.split(" ");
+
+		List<Comparable[]> rows = rows = new ArrayList<Comparable[]>();
+		// Go through each of the tuples
+		for (Map.Entry<KeyType, Comparable[]> e : index.entrySet()) 
+		{
+			// Checks if value exists, if not then skips this iteration
+			if (table2.index.get(new KeyType(extract(e.getValue(), t_attrs))) == null) 
+			{
+				continue;
+			}
+			// Adds tuple to table
+			rows.add(ArrayUtil.concat((e.getValue()), table2.index.get(new KeyType(extract(e.getValue(), t_attrs)))));			
+		}
+
+		return new BPTreeTable (name + count++, ArrayUtil.concat (attribute, table2.attribute),
+				ArrayUtil.concat (domain, table2.domain), key, rows);
+	} //indexedJoin
 
     /************************************************************************************
      * Return the column position for the given attribute name.
@@ -370,7 +399,7 @@ public class Table
      */
     public boolean insert (Comparable [] tup)
     {
-        out.println ("DML> insert into " + name + " values ( " + Arrays.toString (tup) + " )");
+        //out.println ("DML> insert into " + name + " values ( " + Arrays.toString (tup) + " )");
 
         if (typeCheck (tup)) {
             tuples.add (tup);
@@ -393,13 +422,15 @@ public class Table
     {
         return name;
     } // getName
+    
+    
 
     /************************************************************************************
      * Print this table.
      */
     public void print ()
     {
-        out.println ("\n Table " + name);
+        out.println ("\n BPTreeTable " + name);
         out.print ("|-");
         for (int i = 0; i < attribute.length; i++) out.print ("---------------");
         out.println ("-|");
@@ -410,6 +441,11 @@ public class Table
         for (int i = 0; i < attribute.length; i++) out.print ("---------------");
         out.println ("-|");
         for (Comparable [] tup : tuples) {
+            
+            if(tup == null)
+            {
+            	break;
+            }
             out.print ("| ");
             for (Comparable attr : tup) 
             {
@@ -444,12 +480,12 @@ public class Table
      *
      * @param name  the name of the table to load
      */
-    public static Table load (String name)
+    public static BPTreeTable load (String name)
     {
-        Table tab = null;
+        BPTreeTable tab = null;
         try {
             ObjectInputStream ois = new ObjectInputStream (new FileInputStream (DIR + name + EXT));
-            tab = (Table) ois.readObject ();
+            tab = (BPTreeTable) ois.readObject ();
             ois.close ();
         } catch (IOException ex) {
             out.println ("load: IO Exception");
@@ -476,21 +512,21 @@ public class Table
         } // try
     } // save
     
-    public boolean equalityCheck(Table checkTable)
+    public boolean equalityCheck(BPTreeTable checkBPTreeTable)
     {
     	
-    	if(attribute.length != checkTable.attribute.length)
+    	if(attribute.length != checkBPTreeTable.attribute.length)
     		return false;
     	for(int i = 0; i < attribute.length; i++)
     	{
-    		if(!(attribute[i].equals(checkTable.attribute[i]) && domain[i].equals(checkTable.domain[i])))
+    		if(!(attribute[i].equals(checkBPTreeTable.attribute[i]) && domain[i].equals(checkBPTreeTable.domain[i])))
     		{
     			return false;
     		}
     	}
     	System.out.println("Tuples");
     	System.out.println(tuples.size());
-    	if(tuples.size() != checkTable.tuples.size())
+    	if(tuples.size() != checkBPTreeTable.tuples.size())
     	{
     		return false;
     	}
@@ -505,7 +541,7 @@ public class Table
         } 
     	
     	String tuplesCheck1 = "";
-    	for (Comparable [] tup : checkTable.tuples) 
+    	for (Comparable [] tup : checkBPTreeTable.tuples) 
     	{
             for (Comparable attr : tup) 
             {
@@ -536,7 +572,7 @@ public class Table
      * @param table2  the rhs table
      * @return  whether the two tables are compatible
      */
-    private boolean compatible (Table table2)
+    private boolean compatible (BPTreeTable table2)
     {
         if (domain.length != table2.domain.length) {
             out.println ("compatible ERROR: table have different arity");
@@ -672,4 +708,4 @@ public class Table
     
     
 
-} // Table class
+} // BPTreeTable class
