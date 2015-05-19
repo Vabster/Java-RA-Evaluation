@@ -1,4 +1,6 @@
 # Java-Relational-Algebra
 An implementation of the Relational Algebra operators
 
-I implemented the project (String attributes), select (Predicate <Comparable []> predicate), select (KeyType keyVal), union (Table table2), minus (Table table2), join(String attribute1, String attribute2, Table table2), and typeCheck (Comparable [] t) functions. All of these functions can be tested in the MovieDB.java file.
+This is an extention of the "Java Relational Algebra" repository. A B+ Tree Map implementation has been created to allow to more quickly access the table components. I implemented the functions in the Table.java class as stated in the "Java Relational Algebra" repository, the BpTreeMap.java class, and the BpTreeMapTest.java class.
+
+The main class in the BpTreeMap is mainly used for testing, in order to check an actual useful example of the B+ Tree Map then run the MovieDB.java class.
