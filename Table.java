@@ -81,7 +81,7 @@ public class Table
         domain    = _domain;
         key       = _key;
         tuples    = new ArrayList <> ();
-        index     = new TreeMap <> ();       // also try BPTreeMap, LinHashMap or ExtHashMap
+        index     = new BpTreeMap<>(KeyType.class, Comparable[].class);      // also try BPTreeMap, LinHashMap or ExtHashMap
     } // constructor
 
     /************************************************************************************
@@ -101,7 +101,7 @@ public class Table
         domain    = _domain;
         key       = _key;
         tuples    = _tuples;
-        index     = new TreeMap <> ();       // also try BPTreeMap, LinHashMap or ExtHashMap
+        index     = new BpTreeMap<>(KeyType.class, Comparable[].class);;       // also try BPTreeMap, LinHashMap or ExtHashMap
     } // constructor
 
     /************************************************************************************
@@ -133,18 +133,16 @@ public class Table
      */
     public Table project (String attributes)
     {
-        out.println ("RA> " + name + ".project (" + attributes + ")");
+    	out.println ("RA> " + name + ".project (" + attributes + ")");
         String [] attrs     = attributes.split (" ");
         Class []  colDomain = extractDom (match (attrs), domain);
         String [] newKey    = (Arrays.asList (attrs).containsAll (Arrays.asList (key))) ? key : attrs;
 
-        List <Comparable []> rows = new ArrayList<Comparable []>();
-       
-    	for (Comparable [] tup : this.tuples)
-    	{
-    		rows.add(extract(tup, attrs));
-        }
-
+        List <Comparable []> rows = new ArrayList<Comparable[]>();
+        for(Map.Entry<KeyType, Comparable[]> mapIndex: index.entrySet()){
+        	rows.add(extract(mapIndex.getValue(),attrs));
+		
+        		}
 
         return new Table (name + count++, attrs, colDomain, newKey, rows);
     } // project
@@ -209,15 +207,15 @@ public class Table
 
         List <Comparable []> rows = new ArrayList<Comparable []>();
 
-      //Table check = new Table("check", attribute, domain, key, rows);
-        for (Comparable [] tup : this.tuples) 
-        {
-        	rows.add(tup);
-        }
-        for (Comparable [] tup : table2.tuples) 
-        {
-        	rows.add(tup);
-        }
+     // Iterate through current tuples
+     		for (Map.Entry<KeyType, Comparable[]> e : index.entrySet())
+     			// Add current table tupples
+     			rows.add(e.getValue());
+     		
+     		// Iterate through table2 tuples
+     		for (Map.Entry<KeyType, Comparable[]> e : table2.index.entrySet())
+     			// Add table2 table tupples
+     			rows.add(e.getValue());
         
         //check.print();
 
@@ -235,19 +233,24 @@ public class Table
      */
     public Table minus (Table table2)
     {
+    	int count = 0;
         out.println ("RA> " + name + ".minus (" + table2.name + ")");
-        if (! compatible (table2)) return null;
-
-        List <Comparable []> rows = new ArrayList<Comparable []>();
-        tuples.contains(rows);
-
-        for (Comparable [] tup : this.tuples)
-    	{
-    		if(!(table2.tuples.contains(tup)))
-    		{
-    			rows.add(tup);
+       if (! compatible (table2)) return null;
+        boolean minus = false;
+        //List <Comparable []> rows = null;
+        List <Comparable []> rows = new ArrayList<Comparable[]>();
+        for(Map.Entry<KeyType, Comparable[]> mapIndex : index.entrySet()){
+        	for(Map.Entry<KeyType, Comparable[]> mapIndex2: table2.index.entrySet()){
+        		if(mapIndex.getKey().equals(mapIndex2.getKey()) ){
+        			minus = true;
+        			}
+        		}//for mapIndex2
+        	if(minus == false){
+    			rows.add(mapIndex.getValue());
     		}
-        }
+    		minus = false;
+        	}//for mapIndex
+        	
 
         return new Table (name + count++, attribute, domain, key, rows);
     } // minus
@@ -408,7 +411,14 @@ public class Table
         out.println ("-|");
         for (Comparable [] tup : tuples) {
             out.print ("| ");
-            for (Comparable attr : tup) out.printf ("%15s", attr);
+            for (Comparable attr : tup) 
+            {
+            	if(attr == null)
+            	{
+            		break;
+            	}
+            	out.printf ("%15s", attr);
+            }
             out.println (" |");
         } // for
         out.print ("|-");
