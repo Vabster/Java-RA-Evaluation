@@ -1,6 +1,6 @@
-# Java - B+ Tree Indexing
-An implementation of the Relational Algebra operators
+# Java - B+ Tree Indexing, Relational Algebra times
+An Extention of the B+ Tree Indexing Repository
 
-This is an extention of the "Java Relational Algebra" repository. A B+ Tree Map implementation has been created to allow to more quickly access the table components. I implemented the functions in the Table.java class as stated in the "Java Relational Algebra" repository, the BpTreeMap.java class, and the BpTreeMapTest.java class.
+This is an extention of the "Java B+ Tree Indexing" repository. The BPTreeTimes.java file tests the times it takes for the B+ Tree Indexing to perform several of the relational algebra methods, on varying table sizes. It does this for indexed join, ranged select, and point select.
 
-The main class in the BpTreeMap is mainly used for testing, in order to check an actual useful example of the B+ Tree Map then run the MovieDB.java class.
+A indexedJoin function was added to the BPTreeTable.java class rather than the nested loop join function that was used in earlier editions.
