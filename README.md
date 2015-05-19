@@ -1,4 +1,4 @@
-# Java-Relational-Algebra
+# Java - B+ Tree Indexing
 An implementation of the Relational Algebra operators
 
 This is an extention of the "Java Relational Algebra" repository. A B+ Tree Map implementation has been created to allow to more quickly access the table components. I implemented the functions in the Table.java class as stated in the "Java Relational Algebra" repository, the BpTreeMap.java class, and the BpTreeMapTest.java class.
