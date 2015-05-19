@@ -25,7 +25,7 @@ public class BpTreeMap <K extends Comparable <K>, V>
 {
     /** The maximum fanout for a B+Tree node.
      */
-    private static final int ORDER = 7;
+    private static final int ORDER = 5;
 
     /** The class for type K.
      */
@@ -152,7 +152,7 @@ public class BpTreeMap <K extends Comparable <K>, V>
     @SuppressWarnings("unchecked")
     public V get (Object key)
     {
-        return find ((K) key, root);
+    	return find ((K) key, root);
     } // get
 
     /********************************************************************************
@@ -425,35 +425,53 @@ public class BpTreeMap <K extends Comparable <K>, V>
      * @param ney  the current node
      */
     @SuppressWarnings("unchecked")
-    private V find (K key, Node n)
+    private V find (K key, Node node)
     {
-        count++;
-        
-        for (int i = 0; i < n.nKeys; i++) 
-        {
-            K k_i = n.key [i];
-            if (key.compareTo (k_i) <= 0) 
-            {
-                if (n.isLeaf) 
-                {
-                	
-                    return (key.equals (k_i)) ? (V) n.ref [i] : null;
-                } 
-                else 
-                {
-                	if(key.equals(k_i))
-                	{
-                		return find (key, (Node) n.ref [i+1]);
-                	}
-                	else
-                	{
-                		return find (key, (Node) n.ref [i]);
-                	}
-                	
-                } // if
-            } // if
-        } // for
-        return (n.isLeaf) ? null : find (key, (Node) n.ref [n.nKeys]);
+		// Increments count
+		count++;
+		// Traverses the tree and searches for the key.
+		for (int i = 0; i < node.nKeys; i++) 
+		{
+			// Looks in leaf node to check if key is present
+			if (node.isLeaf) 
+			{
+				if (key.compareTo(node.key[i]) == -1) 
+				{
+					// No match is present, so it returns null
+					return null;
+				} 
+				else if (key.compareTo(node.key[i]) == 0) 
+				{ 
+					return (V) node.ref[i];				
+				} 
+				else
+				{
+					continue;
+				}
+			}
+			else
+			{
+				//Moves down the tree to find key
+				if (i == 0 && key.compareTo(node.key[i]) < 0 || (i > 0 && key.compareTo(node.key[i-1]) >= 0 && key.compareTo(node.key[i]) < 0)) 
+				{ 				
+					count++;
+					node = (Node) node.ref[i];	
+					i = -1;
+				} 
+				else if (i == node.nKeys - 1) 
+				{ 				
+					count++;
+					node = (Node) node.ref[i+1];	
+					i = -1;
+				}
+				else
+				{
+					continue;
+				}
+			}
+		}
+		
+		return null;
     } // find
     
     /**
@@ -493,7 +511,7 @@ public class BpTreeMap <K extends Comparable <K>, V>
     	// Checks that duplicate key is not added
     	if(get(key) != null)
     	{
-    		out.println("BpTreeMap:insert: attempt to insert duplicate key = " + key);
+    		//out.println("BpTreeMap:insert: attempt to insert duplicate key = " + key);
     		//Resets count
     		count = 0;
             return;
@@ -1026,10 +1044,10 @@ public class BpTreeMap <K extends Comparable <K>, V>
     	
         BpTreeMap <Integer, Integer> bpt = new BpTreeMap <> (Integer.class, Integer.class);
         
-        int totKeys = 120;
+        int totKeys = 1000;
         if (args.length == 1) totKeys = Integer.valueOf (args [0]);
-        for (int i = 1; i < totKeys; i += 2) { bpt.put (i, i * i);} // for
-        //for (int i = totKeys; i > 1; i -= 2) { bpt.put (i, i * i);} // for
+        //for (int i = 1; i < totKeys; i += 2) { bpt.put (i, i * i);} // for
+        for (int i = totKeys; i > 1; i--) { bpt.put (i, i * i);} // for
         int count = 0;
         //for(int i = 0; i < totKeys; i += 2){out.println(i + " " + (totKeys-i));if(count % 2 == 0){bpt.put (i, i * i);}else{bpt.put(totKeys - i, i * i);}count++;}
         
@@ -1051,7 +1069,7 @@ public class BpTreeMap <K extends Comparable <K>, V>
       	out.println(bpt.firstKey());
       	out.println(bpt.lastKey());
       	
-      	 for (int i = 0; i < totKeys; i++) {out.println ("key = " + i + " value = " + bpt.get (i));} // for
+      	 //for (int i = 0; i < totKeys; i++) {out.println ("key = " + i + " value = " + bpt.get (i));} // for
       	 out.println ("-------------------------------------------");
          out.println ("Average number of nodes accessed = " + bpt.count / (double) totKeys);
       	
