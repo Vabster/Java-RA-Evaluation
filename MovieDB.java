@@ -22,22 +22,22 @@ class MovieDB
     {
         out.println ();
 
-        Table movie = new Table ("movie", "title year length genre studioName producerNo",
+        BPTreeTable movie = new BPTreeTable ("movie", "title year length genre studioName producerNo",
                                           "String Integer Integer String String Integer", "title year");
 
-        Table cinema = new Table ("cinema", "title year length genre studioName producerNo",
+        BPTreeTable cinema = new BPTreeTable ("cinema", "title year length genre studioName producerNo",
                                             "String Integer Integer String String Integer", "title year");
 
-        Table movieStar = new Table ("movieStar", "name address gender birthdate",
+        BPTreeTable movieStar = new BPTreeTable ("movieStar", "name address gender birthdate",
                                                   "String String Character String", "name");
 
-        Table starsIn = new Table ("starsIn", "movieTitle movieYear starName",
+        BPTreeTable starsIn = new BPTreeTable ("starsIn", "movieTitle movieYear starName",
                                               "String Integer String", "movieTitle movieYear starName");
 
-        Table movieExec = new Table ("movieExec", "certNo name address fee",
+        BPTreeTable movieExec = new BPTreeTable ("movieExec", "certNo name address fee",
                                                   "Integer String String Float", "certNo");
 
-        Table studio = new Table ("studio", "name address presNo",
+        BPTreeTable studio = new BPTreeTable ("studio", "name address presNo",
                                             "String String Integer", "name");
 
         Comparable [] film0 = { "Star_Wars", 1977, 124, "sciFi", "Fox", 12345 };
@@ -86,54 +86,54 @@ class MovieDB
         studio.insert (studio2);
         studio.print ();
 
-        movie.save ();
-        cinema.save ();
-        movieStar.save ();
-        starsIn.save ();
-        movieExec.save ();
-        studio.save ();
+        //movie.save ();
+        //cinema.save ();
+        //movieStar.save ();
+        //starsIn.save ();
+        //movieExec.save ();
+        //studio.save ();
 
         movieStar.printIndex ();
 
         //--------------------- project
 
         out.println ();
-        Table t_project = movie.project ("title year");
+        BPTreeTable t_project = movie.project ("title year");
         t_project.print ();
 
         //--------------------- select
 
         out.println ();
-        Table t_select = movie.select (t -> t[movie.col("title")].equals ("Star_Wars") &&
+        BPTreeTable t_select = movie.select (t -> t[movie.col("title")].equals ("Star_Wars") &&
                                             t[movie.col("year")].equals (1977));
         t_select.print ();
 
         //--------------------- indexed select
 
         out.println ();
-        Table t_iselect = movieStar.select (new KeyType ("Harrison_Ford"));
+        BPTreeTable t_iselect = movieStar.select (new KeyType ("Harrison_Ford"));
         t_iselect.print ();
 
         //--------------------- union
 
         out.println ();
-        Table t_union = movie.union (cinema);
+        BPTreeTable t_union = movie.union (cinema);
         t_union.print ();
 
         //--------------------- minus
 
         out.println ();
-        Table t_minus = movie.minus (cinema);
+        BPTreeTable t_minus = movie.minus (cinema);
         t_minus.print ();
 
         //--------------------- join
 
         out.println ();
-        Table t_join = movie.join ("studioName", "name", studio);
+        BPTreeTable t_join = movie.indexedJoin ("studioName", "name", studio);
         t_join.print ();
 
         out.println ();
-        Table t_join2 = movie.join ("title year", "title year", cinema);
+        BPTreeTable t_join2 = movie.indexedJoin ("title year", "title year", cinema);
         t_join2.print ();
 
     } // main
